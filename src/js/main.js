@@ -1,6 +1,7 @@
 (function () {
   var life = {
     $title: document.getElementById("title"),
+    $avatar: document.getElementById("avatar"),
     $el: document.getElementById("life"),
     utils: {
       extend: function (object) {
@@ -18,6 +19,7 @@
       yearLength: 120, // 120px per year
       hideAge: false, // Hide age from year axis
       customStylesheetURL: null, // Custom stylesheet
+      avatarURL: null,
     },
     start: function () {
       life.loadConfig(function (config) {
@@ -34,7 +36,7 @@
     },
     loadConfig: function (fn) {
       var xhr = new XMLHttpRequest();
-      xhr.open("GET", "config.json", true);
+      xhr.open("GET", "../config/config.json", true);
       xhr.onload = function () {
         if (xhr.status == 200) {
           fn(JSON.parse(xhr.responseText));
@@ -55,7 +57,7 @@
     },
     fetch: function (fn) {
       var xhr = new XMLHttpRequest();
-      xhr.open("GET", "life.md", true);
+      xhr.open("GET", "../life.md", true);
       xhr.onload = function () {
         if (xhr.status == 200) fn(xhr.responseText);
       };
@@ -68,11 +70,32 @@
         var matches = l.match(/\-\s+([\d\/\-\~]+)\s(.*)/i);
         var time = matches[1];
         var text = matches[2];
-        var tags = text.match(/#(.*)/gm);
+
+        var tags = text.match(/(\s{1}#[A-Za-z0-9_-]+)/gm);
+        if (tags) {
+          for (tag of tags) {
+            // remove tag from text
+            text = text.replace(tag, "");
+          }
+          tags = tags.join(" ");
+        }
+
+        var note = text.match(/\{(.*)\}/gm);
+        if (note) {
+          note = note[0];
+
+          // remove note from text
+          text = text.replace(note, "");
+
+          note = note.replace("{", "");
+          note = note.replace("}", "");
+        }
+
         data.push({
           time: life.parseTime(time),
           text: text.replace(tags, ""),
           tags: tags ?? "",
+          note: note ?? "",
         });
       });
       return data;
@@ -83,13 +106,13 @@
     parseTime: function (time, point) {
       if (!point) point = "start";
       var data = {};
-      data.title = time;
       if (/^\~\d+$/.test(time)) {
         // ~YYYY
         data = {
           startYear: parseInt(time.slice(1), 10),
           estimate: true,
         };
+        data.title = time;
       } else if (/^\d+$/.test(time)) {
         // YYYY
         data[point + "Year"] = parseInt(time, 10);
@@ -126,6 +149,7 @@
         data.endYear = now.getFullYear();
         data.endMonth = now.getMonth() + 1;
         data.endDate = now.getDate();
+        data.title = time;
       }
       return data;
     },
@@ -135,7 +159,7 @@
       return date.toLocaleString("en-US", { month: "short" });
     },
     firstYear: null,
-    renderEvent: function (d) {
+    renderEvent: function (d, id) {
       var firstYear = life.firstYear;
       var yearLength = life.config.yearLength;
       var monthLength = yearLength / 12;
@@ -189,30 +213,38 @@
       while (
         (link = d.text.match(/\[([^\]]+)\]\(([^)"]+)(?: \"([^\"]+)\")?\)/))
       ) {
-        var link_attr = "";
-        if (link[3] !== undefined) {
-          link_attr = " title='" + link[3] + "'";
-        }
         d.text = d.text.replace(
           link[0],
-          "<a href='" + link[2] + "'" + link_attr + ">" + link[1] + "</a>"
+          `<a class="bg-white hover:bg-blue-50 text-blue-500 font-semibold px-1 py-0.5 rounded-md border border-blue-400" href="${link[2]}">${link[1]}</a>`
         );
       }
 
+      console.log(d.time.title);
+
       return `
-        <div class="event mb-1 ml-[${offset}px]">
-          <div class="time rounded-full inline-block h-0 -left-0.5 border-blue-500 border-4 mr-3 w-[${width}px] overflow-hidden relative">
+        <div name="event" class="event mb-1 ml-[${offset}px]">
+          <div name="timeline" class="time rounded-full inline-block h-0 -left-0.5 border-blue-500 border-4 mr-3 w-[${width}px] overflow-hidden relative">
           </div>
-          <div class="inline-flex rounded-md" role="group">
-            <span type="button" class="date rounded-l-lg border-solid border border-blue-400 bg-blue-50 p-1 text-blue-500">${
+          <div class="inline-flex rounded-md" role="group" >
+            <span name="time" type="button" class="date rounded-l-lg border-solid border border-blue-400 bg-blue-50 p-1 text-blue-500">${
               d.time.title
             }</span>
-            <span type="button" class="border-solid border border-stone-400 bg-stone-200 text-stone-800 p-1 -ml-[1px] ${
+            <span name="title" type="button" class="border-solid border border-stone-400 bg-stone-200 text-stone-800 p-1 -ml-[1px] ${
               d.tags ? "" : "rounded-r-lg"
-            }">${d.text}</span>
-            <span type="button" class="rounded-r-lg border-solid border border-stone-400 bg-stone-50 text-stone-800 p-1 -ml-[1px] empty:hidden">${
+            }">${d.text}
+            </span>
+            <span name="tags" type="button" class="rounded-r-lg border-solid border border-stone-400 bg-stone-50 text-stone-800 p-1 -ml-[1px] empty:hidden">${
               d.tags
             }</span>
+          </div>
+          <div class="inline-flex items-center cursor-default justify-center text-sm w-5 h-5 font-bold text-white bg-red-400 rounded-full ${
+            d.note ? "" : "hidden"
+          }" ${
+        d.note ? 'data-tooltip-target="tooltip-' + id + '"' : ""
+      } data-tooltip-placement="right">!</div>
+          <div id="tooltip-${id}" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
+            ${d.note}
+            <div class="tooltip-arrow" data-popper-arrow></div>
           </div>
         </div>
         `;
@@ -235,8 +267,16 @@
       return html;
     },
     render: function (title, data) {
+      // Set title for page and card.
       document.title = title;
       life.$title.innerHTML = title;
+
+      // Set avatar. If null, hide avatar from card.
+      if (life.config.avatarURL) {
+        life.$avatar.src = life.config.avatarURL;
+      } else {
+        life.$avatar.classList.add("hidden");
+      }
 
       // Get the first and last year for the year axis
       var firstYear = new Date().getFullYear();
@@ -256,8 +296,10 @@
         '<div id="life-years" class="comment_">' +
         life.renderYears(firstYear, lastYear) +
         "</div>";
-      data.forEach(function (d) {
-        html += life.renderEvent(d);
+      var id = 0;
+      data.forEach(function (d, id) {
+        html += life.renderEvent(d, id);
+        id++;
       });
       html += "</div>";
       life.$el.innerHTML = html;

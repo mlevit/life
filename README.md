@@ -2,10 +2,6 @@
 
 Life is a simple event timeline of events important to your life. This repository is a [fork of the original](https://github.com/cheeaun/life) repository with a few updates.
 
-- Update style sheet utilising Tailwind CSS where possible
-- Easier to read dates
-- Event tagging
-
 You can have a look at the new life timeline here https://mlevit.github.io/life/.
 
 ## Features
@@ -15,7 +11,13 @@ You can have a look at the new life timeline here https://mlevit.github.io/life/
 - No fancy setup
 - No fancy effects
 - Flexible datetimes because sometimes you don't remember the exact date of an event
-- Hashtags to clasiffy your events (optional)
+
+### Newly added
+
+- Event filtering
+- Personal avatar (because why not)
+- Hashtags to help clasiffy your events (optional)
+- Notes to add that extra bit of info (optional)
 
 ## How to contribute
 
@@ -34,9 +36,10 @@ You can have a look at the new life timeline here https://mlevit.github.io/life/
 
 ## How to configure your _Life_
 
+- `avatarURL` - (_string_, default to `null`) Path to avatar.
 - `customStylesheetURL` - (_string_, default to `null`) Path to a custom stylesheet file, for those who doesn't like the default _theme_.
-- `yearLength` - (_number_, default to `120`) The width of the year grids, in pixels.
 - `hideAge` - (_boolean_, default to `false`) Option to hide age from year axis.
+- `yearLength` - (_number_, default to `120`) The width of the year grids, in pixels.
 
 ## Datetime "syntax"
 
@@ -49,14 +52,20 @@ You can have a look at the new life timeline here https://mlevit.github.io/life/
 
 ## Hashtags
 
-Tags can be added to each event line. Simple place them at the end of the event and start them with a `#`.
+Tags can be added to each event. Simple start each tag with a `#`. They will be automatically parsed up and added to the timeline.
+
+## Notes
+
+Notes can be added to each event. Simple enclose the note within curly braces `{}`. They will be automatically parsed and added to the timeline as a tooltip.
 
 ## Todo
 
-- [ ] Better way to visualise links inside events
+- [x] Better way to visualise links inside events
 - [ ] Replace CSS file with Tailwind CSS
 - [ ] Cleanup of JavaScript file
-- [ ] Event filtering /search by title or tag
+- [x] Event filtering / search by title or tag
+- [x] Event notes
+- [x] Avatar
 
 ## License
 

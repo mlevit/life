@@ -219,8 +219,6 @@
         );
       }
 
-      console.log(d.time.title);
-
       return `
         <div name="event" class="event mb-1 ml-[${offset}px]">
           <div name="timeline" class="time rounded-full inline-block h-0 -left-0.5 border-blue-500 border-4 mr-3 w-[${width}px] overflow-hidden relative">

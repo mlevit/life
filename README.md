@@ -2,7 +2,7 @@
 
 Life is a simple event timeline of events important to your life. This repository is a [fork of the original](https://github.com/cheeaun/life) repository with a few updates.
 
-You can have a look at the new life timeline here https://mlevit.github.io/life/.
+You can have a look at the new life timeline here https://life-public.vercel.app/.
 
 ## Recommended IDE Setup
 
@@ -15,7 +15,7 @@ See [Vite Configuration Reference](https://vitejs.dev/config/).
 ## Project Setup
 
 ```sh
-npm install
+npm install --legacy-peer-deps
 ```
 
 ### Compile and Hot-Reload for Development
